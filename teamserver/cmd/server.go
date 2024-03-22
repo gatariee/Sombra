@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"sync"
 
+	"sombra/cmd/crypto"
 	"sombra/cmd/listeners"
 
 	"github.com/gin-gonic/gin"
@@ -23,6 +24,7 @@ type Sombra struct {
 	IP          string
 	Port        string
 	Ops         *Operators
+	Keys        *crypto.ServerKeys
 	Servers     map[string]*http.Server
 	Shared      listeners.Shared
 	sharedData  *listeners.Shared
@@ -52,15 +54,11 @@ func (s *Sombra) Start() error {
 func (s *Sombra) GetCurrentSharedData() listeners.Shared {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	fmt.Println("[server.go] current sharedData:", s.sharedData)
-
 	return *s.sharedData
 }
 
 func (s *Sombra) getAgents(c *gin.Context) {
 	data := s.GetCurrentSharedData()
-	fmt.Println(data)
 	c.JSON(http.StatusOK, gin.H{"agents": data.AgentList})
 }
 
@@ -105,7 +103,12 @@ func (s *Sombra) startNewListener(port string) error {
 }
 
 func (s *Sombra) NewListener(port string) error {
-	err := listeners.Start(port, s.sharedState)
+	if _, exists := s.Servers[port]; exists {
+		return fmt.Errorf("server on port %s already exists", port)
+	}
+
+	err := listeners.Start(port, s.sharedState, s.Keys.PublicKey, s.Keys.PrivateKey)
+	// passes a copy of Sombra, not the actual struct
 	if err != nil {
 		panic(err)
 	}
