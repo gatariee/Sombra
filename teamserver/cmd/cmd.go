@@ -16,7 +16,7 @@ func SombraInit(ip string, port string, ops *Operators) error {
 		return err
 	}
 
-	if err := storage.SaveServerKeys("sombraData", serverKeys.PublicKey, serverKeys.PrivateKey); err != nil {
+	if err := storage.SaveServerKeys("data", serverKeys.PublicKey, serverKeys.PrivateKey); err != nil {
 		return err
 	}
 

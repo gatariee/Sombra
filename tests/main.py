@@ -65,7 +65,7 @@ if __name__ == "__main__":
     print(r.text)
     print(SESSION_KEY.hex())
     agent_data = {
-        "IP": "1.1.1.1",
+        "IP": "8.1.1.1",
         "ExtIP": "1.1.1.1",
         "Hostname": "test",
         "Sleep": "60",
