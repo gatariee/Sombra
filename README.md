@@ -1,5 +1,8 @@
 ## Sombra
+https://overwatch.fandom.com/wiki/Sombra
 
-### TODO
-1. Create an endpoint for operators to relay instructions to agents (via `50050` to `80`)
-2. Create a method for the `Envelope` struct that takes in a `nonce` and `key` to encrypt the entire struct, then base64 encode it.
+
+### Todo
+1. allow an endpoint for agents to post results to their tasks
+2. check for i/o race conditions with the read/write operations between 50050 and 80
+
