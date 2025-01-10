@@ -18,12 +18,20 @@ type Operators struct {
 func LoadOperators(path string) (*Operators, error) {
 	file, err := os.Open(path)
 	if err != nil {
+		/*
+			@purpose: file not let parent caller handle the error
+		*/
 		return nil, err
 	}
-	defer file.Close()
 
 	operators := &Operators{}
-	if err := json.NewDecoder(file).Decode(operators); err != nil {
+
+	err = json.NewDecoder(file).Decode(operators) /* pass into operators struct */
+	if err != nil {
+		err := file.Close()
+		if err != nil {
+			return nil, err
+		}
 		return nil, err
 	}
 

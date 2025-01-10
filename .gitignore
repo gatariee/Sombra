@@ -1,10 +1,17 @@
+# generic
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-
 *.test
-
 *.out
+
+# go
 go.work
+
+# priv
+teamserver/data/keys/*
+
+# cmake
+*/cmake-*/
