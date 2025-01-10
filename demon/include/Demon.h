@@ -7,6 +7,7 @@ typedef struct API {
 	FARPROC GetStdHandle;
 	FARPROC WriteFile;
 	FARPROC MessageBoxA;
+	FARPROC Sleep;
 } API;
 
 typedef struct {
@@ -16,6 +17,6 @@ typedef struct {
 #define CALL_API( apiName, ... ) \
     ((decltype(&apiName))(DemonInstance.api.apiName))(__VA_ARGS__)
 
-
+VOID DemonSleep( DWORD dwMilliseconds );
 
 #endif

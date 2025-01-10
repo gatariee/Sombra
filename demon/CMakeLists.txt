@@ -16,6 +16,7 @@ set(SRC
 
         core/Print.cc
         core/Lib.cc
+        core/Delay.cc
 )
 
 add_compile_definitions(

@@ -47,15 +47,16 @@ constexpr DWORD hUser32 = Hash( "USER32.dll" );
 constexpr DWORD hGetStdHandle = Hash( "GetStdHandle" );
 constexpr DWORD hWriteFile = Hash( "WriteFile" );
 constexpr DWORD hMessageBoxA = Hash( "MessageBoxA" );
+constexpr DWORD hSleep = Hash( "Sleep" );
 
 #define NULL nullptr
 
 
 #ifdef DEBUG
-#define FILENAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-#define PRINT( fmt, ... ) \
-    DemonPrint("[ Debug - %-8s @ %-8s# L%-2d] " fmt "\n", \
-           FILENAME, __func__, __LINE__, ##__VA_ARGS__)
+#define FILENAME (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#define PRINT(fmt, ...) \
+    DemonPrint("[ Debug ] %-9s -> %-8s #L%-3d - " fmt "\n", \
+               __func__, FILENAME, __LINE__, ##__VA_ARGS__)
 #else
 #define PRINT(fmt, ...)
 #endif
