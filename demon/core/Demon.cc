@@ -60,8 +60,8 @@ FARPROC ResolveFunctionByHash( DWORD hash, unsigned int moduleHash ) {
 	return (FARPROC) 0xdeadbeef;
 };
 
-VOID InitFunc( Demon * demon ) {
-	demon->api.GetStdHandle = (FARPROC) ResolveFunctionByHash( hGetStdHandle, hKernel32 );
-	demon->api.WriteFile = (FARPROC) ResolveFunctionByHash( hWriteFile, hKernel32 );
-	demon->api.MessageBoxA = (FARPROC) ResolveFunctionByHash( hMessageBoxA, hUser32 );
+VOID InitFunc( Demon * DemonInstance ) {
+	DemonInstance->api.GetStdHandle = (FARPROC) ResolveFunctionByHash( hGetStdHandle, hKernel32 );
+	DemonInstance->api.WriteFile = (FARPROC) ResolveFunctionByHash( hWriteFile, hKernel32 );
+	DemonInstance->api.MessageBoxA = (FARPROC) ResolveFunctionByHash( hMessageBoxA, hUser32 );
 }

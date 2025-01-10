@@ -10,7 +10,7 @@
 #include "Win32.h"
 
 // stdlib
-extern "C" VOID printf( Demon * demon, const char * pszFormat, ... );
+extern "C" VOID printf( const char * pszFormat, ... );
 extern "C" size_t strlen( const char * str );
 
 // dfr
@@ -53,12 +53,14 @@ constexpr DWORD hMessageBoxA = Hash( "MessageBoxA" );
 
 #ifdef DEBUG
 #define FILENAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-#define PRINT( demon, fmt, ... ) \
-    printf(demon, "[ Debug - %-8s @ %-8s# L%-2d] " fmt "\n", \
+#define PRINT( fmt, ... ) \
+    printf("[ Debug - %-8s @ %-8s# L%-2d] " fmt "\n", \
            FILENAME, __func__, __LINE__, ##__VA_ARGS__)
 #else
-#define PRINT(demon, fmt, ...)
+#define PRINT(fmt, ...)
 #endif
+
+extern Demon DemonInstance;
 
 BOOL Start( VOID );
 

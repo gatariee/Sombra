@@ -13,7 +13,7 @@ typedef struct {
 	API api;
 } Demon;
 
-#define CALL_API( demon, apiName, ... ) \
-    ((decltype(&apiName))((demon)->api.apiName))(__VA_ARGS__)
+#define CALL_API( apiName, ... ) \
+    ((decltype(&apiName))(DemonInstance.api.apiName))(__VA_ARGS__)
 
 #endif

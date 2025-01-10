@@ -1,11 +1,10 @@
 #include "Common.h"
 
+Demon DemonInstance = {0};
+
 BOOL Start( VOID ) {
-	Demon demon = {0};
-	InitFunc( & demon );
-
-	PRINT( & demon, "MessageBoxA: %p", demon.api.MessageBoxA );
-	CALL_API( & demon, MessageBoxA, NULL, "Hello, World!", "Hello, World!", MB_OK );
-
+	InitFunc( & DemonInstance );
+	PRINT( "MessageBoxA: %p", DemonInstance.api.MessageBoxA );
+	CALL_API( MessageBoxA, NULL, "Hello, World!", "Title", MB_OK );
 	return TRUE;
 }

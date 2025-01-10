@@ -15,7 +15,7 @@ set(SRC
         entry/Exe.cc
 
         core/Print.cc
-        core/Initialize.cc
+        core/Demon.cc
 )
 
 add_compile_definitions(
