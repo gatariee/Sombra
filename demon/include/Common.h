@@ -64,6 +64,6 @@ extern Demon DemonInstance;
 
 BOOL Start( VOID );
 
-VOID InitFunc( Demon * demon );
+FARPROC ResolveFunctionByHash( DWORD hash, unsigned int moduleHash );
 
 #endif

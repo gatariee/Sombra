@@ -16,4 +16,6 @@ typedef struct {
 #define CALL_API( apiName, ... ) \
     ((decltype(&apiName))(DemonInstance.api.apiName))(__VA_ARGS__)
 
+
+
 #endif
