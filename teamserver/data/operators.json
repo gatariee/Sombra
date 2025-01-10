@@ -1,0 +1,14 @@
+{
+    "Operators": [
+        {
+            "Username": "gatari",
+            "Password": "gatari",
+            "Type": "Admin"
+        },
+        {
+            "Username": "test",
+            "Password": "test",
+            "Type": "Operator"
+        }
+    ]
+}

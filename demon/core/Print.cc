@@ -2,7 +2,7 @@
 
 #define SEED 0xDEADBEEF
 
-extern "C" VOID printf( const char * pszFormat, ... ) {
+extern "C" VOID DemonPrint( const char * pszFormat, ... ) {
 	if (!DemonInstance.api.GetStdHandle || !DemonInstance.api.WriteFile) {
 		return;
 	}
