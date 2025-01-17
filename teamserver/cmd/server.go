@@ -36,14 +36,15 @@ type Sombra struct {
 }
 
 type Listener struct {
-	Type     string `json:"type"`
-	Optional string `json:"optional"`
+	Type string `json:"type"`
+	Port string `json:"port"`
 }
 
 type KillListener struct {
 	Port string `json:"port"`
 }
 
+// Operator API
 func (s *Sombra) Start() error {
 	logger.Info(fmt.Sprintf("starting teamserver on %s:%s", s.IP, s.Port))
 
@@ -66,6 +67,12 @@ func (s *Sombra) taskHandler(c *gin.Context) {
 
 	agent := envelope.Agent
 	task := envelope.Task
+
+	if !s.sharedState.VerifyAgent(agent.UID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid agent"})
+		return
+
+	}
 
 	if err := s.UpdateTasks(agent, task); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -112,7 +119,6 @@ func (s *Sombra) GetAgentKey(uid string) ([]byte, []byte) {
 	}
 	return nil, nil
 }
-
 func (s *Sombra) handleStopListener(c *gin.Context) {
 	var req struct {
 		Port string `json:"port"`
@@ -133,7 +139,6 @@ func (s *Sombra) handleStopListener(c *gin.Context) {
 func (s *Sombra) handleNewListener(c *gin.Context) {
 	var (
 		NewListener Listener
-		Port        string
 	)
 
 	logger.Debug("unwrapped new listener request")
@@ -146,19 +151,18 @@ func (s *Sombra) handleNewListener(c *gin.Context) {
 	logger.Debug(fmt.Sprintf("got request for: %s", NewListener.Type))
 	switch NewListener.Type {
 	case "http":
-
+		if NewListener.Port == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request, port?"})
+			return
+		}
 		logger.Info(fmt.Sprintf("fulfilling request for: %s listener", NewListener.Type))
-
-		Port = "80"
-		if err := s.startNewListener(Port); err != nil {
-
+		if err := s.startNewListener(NewListener.Port); err != nil {
 			logger.Err(fmt.Sprintf("failed to start new listener: %v", err))
-
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "New listener started on port " + Port})
+		c.JSON(http.StatusOK, gin.H{"message": "New listener started on port " + NewListener.Port})
 
 	default:
 

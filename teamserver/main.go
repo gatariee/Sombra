@@ -8,6 +8,8 @@ import (
 	"sombra/pkg/logger"
 )
 
+var Version string = "0.0.1-dev"
+
 func main() {
 	if len(os.Args) < 4 {
 		fmt.Println("Usage: ./teamserver <address> <port> <path_to_operators.json>")
