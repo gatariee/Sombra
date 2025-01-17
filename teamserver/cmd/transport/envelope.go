@@ -76,6 +76,9 @@ var (
 
 	// TypeGenericTaskRequest is the magic number for a task sent to the agent
 	TypeGenericTaskRequest uint16 = 0x7
+
+	// TypeGenericTaskResult is the magic number for a task result sent to the teamserver
+	TypeGenericTaskResult uint16 = 0x8
 )
 
 func (e *Envelope) Package(key []byte, nonce []byte) (*Package, error) {
@@ -95,6 +98,36 @@ func (e *Envelope) Package(key []byte, nonce []byte) (*Package, error) {
 	return &Package{
 		Pkg: encrypted,
 	}, nil
+}
+
+func Unpackage(key []byte, nonce []byte, rawData []byte) (*Task, error) {
+
+	decrypted, err := crypto.Base64Decode(string(rawData))
+	if err != nil {
+		return nil, err
+	}
+
+	decryptedData, err := crypto.DecryptAES(key, nonce, decrypted)
+	if err != nil {
+		return nil, err
+	}
+
+	decrypted, err = crypto.Unpad(decryptedData)
+	if err != nil {
+		return nil, err
+	}
+
+	msg, err := DecodeLTVMessage(decrypted)
+	if err != nil {
+		return nil, err
+	}
+
+	data := strings.Split(string(msg.Value), "||")
+	return &Task{
+		CommandID: data[1],
+		Command:   data[2],
+	}, nil
+
 }
 
 func UnwrapKey(enc_key string, privateKey *rsa.PrivateKey) (nonce []byte, key []byte, err error) {

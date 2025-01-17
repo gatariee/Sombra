@@ -168,6 +168,16 @@ func (s *State) FindAgentKey(uid string) (nonce []byte, key []byte) {
 	return nil, nil
 }
 
+func (s *State) GetCurrentSharedData() Shared {
+	/*
+		A safe way to get the current shared data
+	*/
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.Data
+}
+
 func Start(port string, sharedState *State, publicKey *rsa.PublicKey, privateKey *rsa.PrivateKey) error {
 
 	r := gin.Default()
@@ -258,6 +268,54 @@ func Start(port string, sharedState *State, publicKey *rsa.PublicKey, privateKey
 			}
 			c.String(http.StatusOK, "agent registered")
 		}
+	})
+
+	r.POST("/checkout", func(c *gin.Context) {
+
+		// get current shared data using the GetCurrentSharedData method
+		data := sharedState.GetCurrentSharedData()
+		fmt.Println(data)
+
+		rawData, err := c.GetRawData()
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+			return
+		}
+
+		msg, err := transport.DecodeLTVMessage(rawData)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+			return
+		}
+
+		if msg.Type != transport.TypeGenericSombraPackage {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+			return
+		}
+
+		// TypeGenericSombraPackage needs to be unpacked into UID and package before we can do anything
+		uid := strings.Split(string(msg.Value), "||")[0]
+		pkg := strings.Split(string(msg.Value), "||")[1]
+		nonce, key := sharedState.FindAgentKey(uid)
+		if nonce == nil || key == nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find agent key"})
+			return
+		}
+
+		pkg_data, err := transport.DecodeLTVMessage([]byte(pkg))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to decode package"})
+			return
+		}
+
+		task, err := transport.Unpackage(key, nonce, pkg_data.Value)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to unpackage task"})
+			return
+		}
+
+		fmt.Println("task: ", task)
+		c.String(http.StatusOK, "task received")
 	})
 
 	r.POST("/checkin", func(c *gin.Context) {
